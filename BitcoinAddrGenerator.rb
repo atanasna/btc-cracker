@@ -9,7 +9,7 @@ class BitcoinAddressGenerator
 		$public_key_hex
 		$pub_key_hash
 		$public_key
-                $private_key 
+        $private_key
 	end
 
 	def generate_address
