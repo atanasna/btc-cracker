@@ -12,7 +12,7 @@ class Program
     end
 
     def start
-        @bitcoin_cracker.bruteforce_from_file_threaded("btc-dormand-accs.txt", 10)
+        @bitcoin_cracker.bruteforce_from_file_threaded("btc-dormand-accs.txt", 1)
         while true do
             write_statistics
             sleep(0.2)

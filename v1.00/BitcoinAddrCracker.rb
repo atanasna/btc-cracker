@@ -1,10 +1,9 @@
 require "set"
 
 load "BitcoinAddrGenerator.rb"
-load "TimeDuration.rb"
-load "ApiHandler.rb"
-load "Logging.rb"
-load "Statistics.rb"
+load "helpers/TimeDuration.rb"
+load "helpers/Logging.rb"
+load "helpers/Statistics.rb"
 
 class BitcoinAddrCracker
     include Logging
@@ -12,33 +11,7 @@ class BitcoinAddrCracker
     
 	def initialize
         @gen = BitcoinAddressGenerator.new
-        @api = ApiHandler.new
 	end
-
-    def generate_address
-        @gen.generate_address
-        addr = @gen.get_public_key.strip
-        key = @gen.get_private_key
-        return addr,key
-    end
-
-    def check_balances
-        i = 0
-        open('myfile.out', 'a') do |f|
-            $dormant_wallets.each do |addr|
-                begin
-                    balance = $api.get_balance(addr)
-                    if balance > 0.1
-                        puts "#{i}: addr:#{addr} | balance:#{balance}"
-                        f << "#{i}: addr:#{addr} | balance:#{balance}\n"
-                    end
-                    i+=1
-                rescue
-                    puts "Problem with #{addr}"
-                end
-            end
-        end
-    end
 
     def bruteforce_from_file(filename)
         dormant_wallets = SortedSet.new
@@ -46,10 +19,8 @@ class BitcoinAddrCracker
             dormant_wallets.add line.strip
         end
 
-        addr = "17hPkMxBZRjxLig8L3zqaeMQxQVkgM4VeZ"
-        key = "asd"
         while true do  
-            addr,key = generate_address
+            wallet = BitcoinWallet.new @gen.get_public_key.strip,@gen.get_private_key
             if dormant_wallets.include?(addr)
                 #puts "#{addr}, #{key}"
                 LOG_MAIN.info "YEEEAH - addr:#{addr} | key:#{key}"
