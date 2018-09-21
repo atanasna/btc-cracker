@@ -22,10 +22,11 @@ module Statistics
     STATISTICS_CLIENT = Struct.new(
         :time_start,
         :time_elapsed,
+        :running_threads,
         :generated_wallets_cnt,
         :sent_wallets_cnt,
         :wallets_per_second,
-    ).new(Time.now,0.0,0.0,0.0)
+    ).new(Time.now,0.0,0,0,0,0.0)
 
     private
 
@@ -63,6 +64,7 @@ module Statistics
         puts "------------ Statistics: General ------------"
         puts "Starting Time:".ljust(18) + "#{STATISTICS_CLIENT.time_start}".bold
         puts "Running Time:".ljust(18) + "#{STATISTICS_CLIENT.time_elapsed}".bold
+        puts "Running Threads:".ljust(18) + "#{STATISTICS_CLIENT.running_threads}".bold
         puts ""
         puts "------------ Statistics: Wallets ------------"
         puts "Generated Wallets:".ljust(28) + "#{STATISTICS_CLIENT.generated_wallets_cnt}".yellow.bold
