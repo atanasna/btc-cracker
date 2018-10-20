@@ -8,16 +8,11 @@ require 'socket'
 
 class BtcCrackerServer
     include Logging
-    include Statistics
+    include StatisticsServer
 
     def initialize port,filename
         @port = port
         LOG_SERVER_MAIN.info "Starting in Server Mode [port:#{port}]"
-    
-        @dormant_addresses = SortedSet.new
-        open(filename).each do |line|
-            @dormant_addresses.add line.strip
-        end
     end
 
     def start
@@ -27,18 +22,14 @@ class BtcCrackerServer
             while true
                 client = server.accept
                 data = JSON.parse(client.gets)
-                STATISTICS_SERVER.received_wallets_cnt += data.size       
-                data.each do |wallet_json|
-                    wallet = BitcoinWallet.new wallet_json["address"], wallet_json["key"]
-                    if @dormant_addresses.include?(wallet.address)
-                        #puts "#{addr}, #{key}"
-                        LOG_SERVER_MAIN.info "YEEEAH - addr:#{wallet.address} | key:#{wallet.key}"
-                        LOG_RESULTS.info "YEEEAH - addr:#{wallet.address} | key:#{wallet.key}"
-                        STATISTICS_SERVER.nonempty_wallets.push Hash[:addr, wallet.address, :key, wallet.key]
-                        STATISTICS_SERVER.nonempty_wallets_cnt +=1
-                    end
-                    STATISTICS_SERVER.checked_wallets_cnt += 1
+                if data["type"] == "wallet"
+                    wallet_data = data["wallet"]
+                    wallet = BitcoinWallet.new wallet_data["address"], wallet_data["key"], wallet_data["empty"]
                 end
+                if data["type"] == "type"
+                end 
+                
+                STATISTICS_SERVER.nonempty_wallets.push Hash[:addr, wallet.address, :key, wallet.key] 
             end
         end
         
@@ -47,7 +38,7 @@ class BtcCrackerServer
                 puts "ERROR: The main Process is in status: #{thr.status}"
                 break           
             end
-            write_server_statistics
+            print_server_stats
             sleep(0.2)
         end
     end
